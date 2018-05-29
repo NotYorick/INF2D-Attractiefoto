@@ -18,6 +18,7 @@ while(True):
         sampleNum=sampleNum+1
         #saving the captured face in the dataset folder
         cv2.imwrite("dataSet/User."+Id +'.'+ str(sampleNum) + ".jpg", gray[y:y+h,x:x+w])
+        
 
         #cv2.imshow('Face',img)
     #wait for 100 miliseconds 

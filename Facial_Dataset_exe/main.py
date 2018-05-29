@@ -4,6 +4,7 @@ kivy.require('1.0.6')
 from glob import glob
 from random import randint
 import os
+import sys
 from kivy.uix.label import Label
 from os.path import join, dirname
 from kivy.uix.gridlayout import GridLayout
@@ -19,6 +20,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.textinput import TextInput
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.progressbar import ProgressBar
+import glob as globs
 from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 from subprocess import Popen, PIPE
@@ -32,71 +34,50 @@ import threading
 from subprocess import call
 from kivy.graphics.texture import Texture
 from kivy.uix.screenmanager import Screen
+import importlib
 import cv2
-
-class pop(Widget):
-
-    
-    
-    def remove_img(self, path):
-        os.remove(path)
-        
-        
-    
-    
-        
-    
-    def show_it(self,Picture):
-        pic = Picture
-        def delete_pic(self):
-            print("hoi")
-            pic._set_x(-1000)
-            pic._set_y(-1000)
-            
-            
-            
-        
-        self.box=FloatLayout()
-        
-        self.lab=(Label(text="Are you sure you do not want this picture? ",font_size=15,
-        	size_hint=(None,None),pos_hint={'x':.25,'y':.6}))
-        self.box.add_widget(self.lab)
-        
-        self.but=(Button(text="close",size_hint=(None,None),
-        	width=200,height=50,pos_hint={'x':0,'y':0}))
-        self.box.add_widget(self.but)
-
-        self.delet=(Button(text="Delete",size_hint=(None,None),
-        	width=200,height=50,pos_hint={'x':.5,'y':0}))
-        self.box.add_widget(self.delet)
-       
-        self.main_pop = Popup(title="Warning",content=self.box,
-        	size_hint=(None,None),size=(450,300),auto_dismiss=False,title_size=15)
-        
-        self.but.bind(on_press=self.main_pop.dismiss)
-
-        self.delet.bind(on_press=delete_pic)
-
-        self.main_pop.open()
-        
-        
-
+from kivy.graphics import Line, Color
+import trainner
+from kivy.animation import Animation
+import detector_img
+import time
+import threading
 
 class remove_place(Scatter):
     
     source = StringProperty(None)
-    
-class Picture(Scatter, ButtonBehavior):
 
-    def on_press(self):
-       print("UP")
-            
+class Picture(Scatter):
+
+    def on_touch_down(self, touch):
+       
+        print(touch.x)
+        print(touch.y)
+        
+        return True
+
     
     source = StringProperty(None)
 
-
+class ConvertBlack():
+    def ConvertImages():
+        
+        files = globs.glob ("img/*.jpg")
+        for myFile in files:
+                
+            print(myFile)
+            img = cv2.imread(str(myFile))
+            myFile = myFile[4:-4]
+            img = cv2.cvtColor( img, cv2.COLOR_RGB2GRAY )
+            cv2.imwrite("img/Black/" + myFile + ".jpg", img)
+         
+            print("Write Completed")
+              
+        
+           
 class PicturesApp(App):
 
+    
     def build(self):
 
         # the root is created in pictures.kv
@@ -104,12 +85,20 @@ class PicturesApp(App):
         
         def delete_camera():
             root.remove_widget(self.my_camera)
+            
             #self.capture.release()
             
-            
+        
         def build_camera():
+
+            picture_text = Label(text="Look at the camera",  font_size='80sp', size_hint=(1, 1.8))
+            root.add_widget(picture_text)
+           
+            
             def start_button(self):
+ 
                 def create_dataset():
+                               
                     path2 = r'img_results'
                     for file in os.listdir('img_results'):
                         if file.endswith('.jpg') or file.endswith('.JPG') or file.endswith('.png'):
@@ -125,6 +114,8 @@ class PicturesApp(App):
                     Id = "1"
                     sampleNum=0
                     
+                    
+                    
                     while(True):
                         
                         ret, img = cam.read()
@@ -138,28 +129,45 @@ class PicturesApp(App):
                             sampleNum=sampleNum+1
                             #saving the captured face in the dataset folder
                             cv2.imwrite("dataSet/User."+Id +'.'+ str(sampleNum) + ".jpg", gray[y:y+h,x:x+w])
+                            
 
                         #cv2.imshow('Face',img)
                         #wait for 100 miliseconds
                             
-                        if cv2.waitKey(100) & 0xFF == ord('q'):
+                        if cv2.waitKey(1000) & 0xFF == ord('q'):
                            
                             break
-                        # break if the sample number is morethan 20
-                        elif sampleNum>20:
+                        # break if the sample number is morethan ...
+                        elif sampleNum>15:
                             
                             break
                     
                     
                     delete_camera()
+                    root.remove_widget(picture_text)
                     
-                    os.system("trainner 1")
-                    os.system("detector_img 1")
+                    trainner.train()
+                    
+                    KivyCamera.CancelUpdate()
+                    pbar = Pbar()
+                    th = threading.Thread(target=pbar.bar)
+                    th.start()
+                    
+                    detector_img.recog()
+                    
+                    
                     root.remove_widget(start)
                     
                     build_picturescreen()
-                create_dataset()
 
+          
+                t = threading.Thread(target=create_dataset)
+                t.start()
+
+                
+                
+                
+                
             cap = cv2.VideoCapture(0)
             self.capture = cap
             self.my_camera = KivyCamera(capture=self.capture, fps=60)
@@ -169,41 +177,58 @@ class PicturesApp(App):
             root.add_widget(self.my_camera)
 
         def build_picturescreen():
-        
-            root.add_widget(Label(text="Pictures",  font_size='80sp', size_hint=(0.23, 0.2)))
-            root.add_widget(Button(text='Buy', pos_hint={'x': 0.8, 'y': 0.05}, size_hint=(0.15,0.1)))
-            layout = ScrollView(size_hint=(None, None), size=(800, 820), pos_hint={'center_x': 0.5, 'center_y': .525}, do_scroll_x=False)
+
+            
+            
+            def exit_session(self):
+                build_camera()
+                root.remove_widget(layout)
+                root.remove_widget(picture_text)
+                root.remove_widget(exit_button)
+                root.remove_widget(buy_button)
+
+    
+
+            picture_text = Label(text="Pictures",  font_size='80sp', size_hint=(0.23, 1.8))
+            root.add_widget(picture_text)
+            
+            
+            buy_button = Button(text='Buy', pos_hint={'x': 0.82, 'y': 0.05}, size_hint=(0.15,0.1))
+            root.add_widget(buy_button)
+            exit_button = Button(text='Exit', pos_hint={'x': 0.03, 'y': 0.05}, size_hint=(0.15,0.1))
+            exit_button.bind(on_press=exit_session)
+            root.add_widget(exit_button)
+            layout = ScrollView(size_hint=(None, None), size=(930, 630), pos_hint={'center_x': 0.5, 'center_y': .525}, do_scroll_x=False)
             #layout.bind(minimum_height=layout.setter('height'))
             
             
 
-            box = GridLayout(cols=4, size_hint_y=None)
+            box = GridLayout(cols=3, size_hint_y=None)
             box.bind(minimum_height=box.setter("height"))
-            5
+            
             layout.add_widget(box)
 
             root.add_widget(layout)
-            img = Picture(source="remove.png", rotation=randint(0, 0), pos=(1430, 760))
-            
-            
-            root.add_widget(img)
-
             
             
             # get any files into images directory
             curdir = dirname(__file__)
             counter = 100
             counter2 = 100
-            print("test0")
-            def picture_press(instance):
-                print("hey")
+            
+            
+            
+
+            
             for filename in glob(join(curdir, 'img_results', '*')):
-                print("test")
+                
+                
                 try:
                     # load the image
+                    
+                     
                     picture = Picture(source=filename, rotation=randint(0, 0), pos=(counter2,counter))
                     
-                    picture.bind(on_press=picture_press)
                     counter = counter + 150
                     if counter > 700:
                         counter = 100
@@ -213,11 +238,15 @@ class PicturesApp(App):
                 
             
                     # add to the main field
+                  
                     box.add_widget(picture)
+                 
                 except Exception as e:
                     Logger.exception('Pictures: Unable to load <%s>' % filename)        
         #Start here your methods
-        build_camera()
+        #build_camera()
+        build_picturescreen()
+        #ConvertBlack.ConvertImages()
         #-------
                     
     def on_pause(self):
@@ -228,12 +257,18 @@ class PicturesApp(App):
 
     
 class KivyCamera(Image):
+
+    
     def __init__(self, capture, fps, **kwargs):
+        global updates
         super(KivyCamera, self).__init__(**kwargs)
         self.capture = capture
         updates = Clock.schedule_interval(self.update, 1.0 / fps)
 
 
+    def CancelUpdate():
+        global updates
+        updates.cancel()
     
     def update(self, dt):
         
@@ -245,7 +280,7 @@ class KivyCamera(Image):
         # Our operations on the frame come here
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         
-        faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+        faces = face_cascade.detectMultiScale(gray, 1.05, 3)
         
         # Display the resulting frame
         
