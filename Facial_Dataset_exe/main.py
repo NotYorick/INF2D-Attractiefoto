@@ -39,6 +39,7 @@ import cv2
 from kivy.graphics import Line, Color
 import trainner
 from kivy.animation import Animation
+from kivy.clock import mainthread
 import detector_img
 import time
 import threading
@@ -83,10 +84,12 @@ class PicturesApp(App):
         # the root is created in pictures.kv
         root = self.root
         
+        
         def delete_camera():
             root.remove_widget(self.my_camera)
             
-            #self.capture.release()
+            
+        
             
         
         def build_camera():
@@ -96,9 +99,23 @@ class PicturesApp(App):
            
             
             def start_button(self):
- 
+
+                loading_pic = Picture(source='Assets/loading.gif', pos=(600, 400))
+                @mainthread
+                def create_loading_gif():
+                    
+                    root.add_widget(loading_pic)
+                                                  
+                @mainthread
+                def delete_loading_gif():
+                    root.remove_widget(loading_pic)
+                    
+                                 
                 def create_dataset():
-                               
+
+                    
+                    
+                     
                     path2 = r'img_results'
                     for file in os.listdir('img_results'):
                         if file.endswith('.jpg') or file.endswith('.JPG') or file.endswith('.png'):
@@ -143,20 +160,21 @@ class PicturesApp(App):
                             break
                     
                     
+                    
                     delete_camera()
+                    create_loading_gif()
                     root.remove_widget(picture_text)
                     
                     trainner.train()
                     
                     KivyCamera.CancelUpdate()
-                    pbar = Pbar()
-                    th = threading.Thread(target=pbar.bar)
-                    th.start()
                     
                     detector_img.recog()
                     
                     
                     root.remove_widget(start)
+
+                    delete_loading_gif()
                     
                     build_picturescreen()
 
@@ -175,7 +193,7 @@ class PicturesApp(App):
             start.bind(on_press=start_button)
             root.add_widget(start)
             root.add_widget(self.my_camera)
-
+        @mainthread
         def build_picturescreen():
 
             
