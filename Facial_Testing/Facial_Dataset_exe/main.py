@@ -129,9 +129,10 @@ class PicturesApp(App):
                     Id = "1"
                     sampleNum=0
                     #for filename in glob(join(dirname(__file__), 'OwnDataset', '*')):
+                    #for file in os.listdir('OwnDataset'):
                     while(True):
                         ret, img = cam.read()
-                        #ret, img = True, filename
+                        #ret, img = file, True
 
 
                         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)

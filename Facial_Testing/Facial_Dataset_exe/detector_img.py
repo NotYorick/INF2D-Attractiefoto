@@ -25,6 +25,7 @@ def recog(save):
     bestImageValue = None
     #files = glob.glob ("img/Black/*.jpg")
     files = glob.glob ("img/*.jpg")
+    lowest_conf = 200
     for myFile in files:
         start = time.time()
         print("--------------------------------------------")
@@ -39,7 +40,6 @@ def recog(save):
         faces=faceDetect.detectMultiScale(gray, 1.2, 10)
 
         for (x,y,w,h) in faces:
-            lowest_conf = 200
             det = True
             #cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
             id,conf=rec.predict(gray[y:y+h,x:x+w])
@@ -48,8 +48,9 @@ def recog(save):
                 lowest_conf = conf
                 bestImage = myFile
                 bestImageValue = [x, y, w, h]
+                print(bestImage + "-------------------------------------------------------------BEST IMAGE")
 
-            if conf < 40:
+            if conf < 30:
                 if id==1:
                     if conf < 0:
                         ImageList.append(myFile)
