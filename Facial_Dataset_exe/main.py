@@ -100,7 +100,7 @@ class PicturesApp(App):
             
             def start_button(self):
 
-                loading_pic = Picture(source='Assets/loading.gif', pos=(600, 400))
+                loading_pic = Picture(source='Assets/loading.gif', pos=(self.parent.width /2 - self.width /2, 400))
                 @mainthread
                 def create_loading_gif():
                     
@@ -145,7 +145,14 @@ class PicturesApp(App):
                             #incrementing sample number 
                             sampleNum=sampleNum+1
                             #saving the captured face in the dataset folder
-                            cv2.imwrite("dataSet/User."+Id +'.'+ str(sampleNum) + ".jpg", gray[y:y+h,x:x+w])
+                            fotoSource = "dataSet/User."+Id +'.'+ str(sampleNum) 
+                            cv2.imwrite(fotoSource + ".jpg", gray[y:y+h,x:x+w])
+
+                            #create mirror image
+                            dsFoto = cv2.imread(fotoSource + ".jpg")
+                            vertical_img = dsFoto.copy()
+                            vertical_img = cv2.flip(dsFoto, 1)
+                            cv2.imwrite(fotoSource + "mirror" + ".jpg", vertical_img)
                             
 
                         #cv2.imshow('Face',img)
