@@ -17,7 +17,7 @@ def train():
             faces.append(faceNp)
             IDs.append(ID)
             #cv2.imshow("Training.",faceNp)
-            cv2.waitKey(10)
+            
         return np.array(IDs),faces
     print("Training finished!")
 

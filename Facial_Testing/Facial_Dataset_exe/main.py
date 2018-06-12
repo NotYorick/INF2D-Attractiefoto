@@ -12,6 +12,8 @@ from random import randint
 from os.path import join, dirname
 from kivy.uix.gridlayout import GridLayout
 from kivy.app import App
+from win32api import GetSystemMetrics
+from kivy.animation import Animation
 from kivy.logger import Logger
 from kivy.uix.scatter import Scatter
 from kivy.properties import StringProperty
@@ -65,6 +67,27 @@ class ConvertBlack():
 
 class PicturesApp(App):
 
+    def animate(self, instance):
+
+        # create an animation object. This object could be stored
+        # and reused each call or reused across different widgets.
+        # += is a sequential step, while &= is in parallel
+        width = GetSystemMetrics(0)
+        height = GetSystemMetrics(1)
+        animation = Animation(pos=(0, 0))
+        animation += Animation(pos=(0, height - 100))
+        animation += Animation(pos=(width - 100, height - 100))
+        animation += Animation(pos=(width - 100, 0))
+        animation += Animation(pos=(0, height - 100))
+        animation += Animation(pos=(width - 100, height - 100))
+        animation += Animation(pos=(width - 100, 0))
+
+
+        # apply the animation on the button, passed in the "instance" argument
+        # Notice that default 'click' animation (changing the button
+        # color while the mouse is down) is unchanged.
+        animation.start(instance)
+
     def build(self):
         # the root is created in pictures.kv
         root = self.root
@@ -73,11 +96,13 @@ class PicturesApp(App):
             root.remove_widget(self.my_camera)
 
         def build_camera():
-            picture_text = Label(text="Look at the camera",  font_size='80sp', size_hint=(1, 1.8))
+            picture_text = Label(text="[color=343d46]Look at the camera[/color]",markup = True,  font_size='80sp', size_hint=(1, 1.8))
             root.add_widget(picture_text)
 
             def start_button(self):
                 loading_pic = Picture(source='Assets/loading.gif', pos=(600, 400))
+                start.disabled = True;
+                moveBlock()
 
                 @mainthread
                 def create_loading_gif():
@@ -103,11 +128,14 @@ class PicturesApp(App):
                     detector=cv2.CascadeClassifier('hc/haarcascade_frontalface_default.xml')
                     Id = "1"
                     sampleNum=0
-
+                    #for filename in glob(join(dirname(__file__), 'OwnDataset', '*')):
                     while(True):
                         ret, img = cam.read()
+                        #ret, img = True, filename
+
+
                         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-                        faces = detector.detectMultiScale(gray, 1.3, 12)
+                        faces = detector.detectMultiScale(gray, 1.05, 12)
                         
                         for (x,y,w,h) in faces:
                             cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
@@ -123,10 +151,11 @@ class PicturesApp(App):
                            
                             break
                         # break if the sample number is morethan ...
-                        elif sampleNum>15:
+                        elif sampleNum >= 15:
                             
                             break
                     delete_camera()
+                    root.remove_widget(animation_button)
                     create_loading_gif()
                     root.remove_widget(picture_text)
                     trainner.train()
@@ -149,7 +178,25 @@ class PicturesApp(App):
             cap = cv2.VideoCapture(0)
             self.capture = cap
             self.my_camera = KivyCamera(capture=self.capture, fps=60)
-            start = Button(text="Scan your face", size=(3,3), size_hint=(0.15,0.1),pos_hint={'center_x': 0.5, 'center_y': 0.1} )
+
+            def build_button(self):
+                # create a button, and  attach animate() method as a on_press handler
+                width = GetSystemMetrics(0)
+                height = GetSystemMetrics(1)
+                button = Button(size_hint=(None, None),
+                                background_normal='',
+                                size=(100, 100),
+                                pos=((width / 2) - 50, (height / 2) - 50),
+                                on_press=self.animate)
+                self.animate(button)
+                return button
+
+            animation_button = build_button(self)
+            def moveBlock():
+                root.add_widget(animation_button)
+
+
+            start = Button(text="Scan your face", size=(3,3), font_size='30sp', size_hint=(0.15,0.1),pos_hint={'center_x': 0.5, 'center_y': 0.1} )
             start.bind(on_press=start_button)
             root.add_widget(start)
             root.add_widget(self.my_camera)
@@ -163,11 +210,11 @@ class PicturesApp(App):
                 root.remove_widget(picture_text)
                 root.remove_widget(exit_button)
                 root.remove_widget(buy_button)
-            picture_text = Label(text="Pictures",  font_size='80sp', size_hint=(0.23, 1.8))
+            picture_text = Label(text="[color=343d46]Pictures[/color]", markup = True,  font_size='80sp', size_hint=(0.23, 1.8))
             root.add_widget(picture_text)
-            buy_button = Button(text='Buy', pos_hint={'x': 0.82, 'y': 0.05}, size_hint=(0.15,0.1))
+            buy_button = Button(text='[color=c0c5ce]Buy[/color]', font_size='50sp', markup = True, pos_hint={'x': 0.82, 'y': 0.05}, size_hint=(0.15,0.1))
             root.add_widget(buy_button)
-            exit_button = Button(text='Exit', pos_hint={'x': 0.03, 'y': 0.05}, size_hint=(0.15,0.1))
+            exit_button = Button(text='[color=c0c5ce]Exit[/color]',markup = True, font_size='50sp', pos_hint={'x': 0.03, 'y': 0.05}, size_hint=(0.15,0.1))
             exit_button.bind(on_press=exit_session)
             root.add_widget(exit_button)
             layout = ScrollView(size_hint=(None, None), size=(930, 630), pos_hint={'center_x': 0.5, 'center_y': .525}, do_scroll_x=False)

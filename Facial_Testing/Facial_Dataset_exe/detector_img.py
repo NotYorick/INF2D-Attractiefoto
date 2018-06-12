@@ -21,6 +21,8 @@ def recog(save):
 
     X_data = []
     ImageList = []
+    bestImage = None
+    bestImageValue = None
     #files = glob.glob ("img/Black/*.jpg")
     files = glob.glob ("img/*.jpg")
     for myFile in files:
@@ -34,16 +36,22 @@ def recog(save):
 
         ret, img = True, image
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        faces=faceDetect.detectMultiScale(gray, 1.2, 5)
+        faces=faceDetect.detectMultiScale(gray, 1.2, 10)
 
         for (x,y,w,h) in faces:
+            lowest_conf = 200
             det = True
             #cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
             id,conf=rec.predict(gray[y:y+h,x:x+w])
             print('Prediction: ' + str(conf))
-            if conf < 60:
+            if conf < lowest_conf:
+                lowest_conf = conf
+                bestImage = myFile
+                bestImageValue = [x, y, w, h]
+
+            if conf < 40:
                 if id==1:
-                    if conf < 40:
+                    if conf < 0:
                         ImageList.append(myFile)
 
                     reco = True
@@ -68,9 +76,10 @@ def recog(save):
             print("NOT DETECTED")
         end = time.time()
         print(end - start)
+    ImageList.append(bestImage)
     cam.release()
     cv2.destroyAllWindows()
-    return ImageList
+    return {'image':ImageList, 'values':bestImageValue}
 
 
         

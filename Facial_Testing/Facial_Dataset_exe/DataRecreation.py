@@ -4,7 +4,8 @@ from PIL import Image
 
 
 def Recreate(self, imagelist):
-    ImageList = imagelist
+    ImageList = imagelist['image']
+    bestImageValues = imagelist['values']
     detector = cv2.CascadeClassifier('hc/haarcascade_frontalface_default.xml')
     Id = "1"
     sampleNum = 16
@@ -17,6 +18,11 @@ def Recreate(self, imagelist):
         faces = detector.detectMultiScale(gray, 1.3, 5)
 
         for (x, y, w, h) in faces:
+            x = bestImageValues[0]
+            y = bestImageValues[1]
+            w = bestImageValues[2]
+            h = bestImageValues[3]
+
             cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
             # incrementing sample number
             sampleNum = sampleNum + 1
