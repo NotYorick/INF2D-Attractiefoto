@@ -6,6 +6,7 @@ import trainner
 import detector_img
 import threading
 import DataRecreation
+import shutil
 
 from glob import glob
 from random import randint
@@ -36,20 +37,34 @@ class remove_place(Scatter):
 
 
 class Picture(Scatter, GridLayout, CompoundSelectionBehavior, FocusBehavior):
+    selected = False
 
+##    def add_widget(self, widget):
+##        """ Override the adding of widgets so we can bind and catch their events. """
+##        widget.bind(on_touch_down=self.on_touch(self, widget))
+##        return super(GridLayout, self).add_widget(widget)
+    def on_touch_down(self, touch):
+        if self.collide_point(*touch.pos):
+            print (os.path.basename(self.source))
+            print ("selected before =", self.selected)
+            if self.selected == False:
+                shutil.copy(self.source, 'selected/')
+                self.selected = True
+                print ("selected after =", self.selected)
+            elif self.selected == True:
+                os.remove('selected/' + os.path.basename(self.source))
+                self.selected = False
+                print ("selected after =", self.selected)
+        #print(self)
+        #print(widget)
+        #self.remove_widget(widget)
+        return
 
-    # def add_widget(self, widget):
-    #     """ Override the adding of widgets so we can bind and catch their events. """
-    #     widget.bind(on_touch_down=self.on_touch(self, widget))
-    #     return super(GridLayout, self).add_widget(widget)
-    #
-    # def on_touch(self, button, widget):
-    #     print('touched')
-    #     print(widget)
-    #     self.remove_widget(widget)
-    #     return
+    def checkselected():
+        return self.selected
 
     source = StringProperty(None)
+    
 
 
 class ConvertBlack():
@@ -114,10 +129,15 @@ class PicturesApp(App):
 
                 def create_dataset():
 
+                    path3 = r'selected'
+                    for file in os.listdir('selected'):
+                        if file.endswith('.jpg') or file.endswith('.JPG') or file.endswith('.png'):
+                            os.remove(path3+ "/" + file)
+
                     path2 = r'img_results'
                     for file in os.listdir('img_results'):
                         if file.endswith('.jpg') or file.endswith('.JPG') or file.endswith('.png'):
-                            os.remove(path2+ "/" + file) 
+                            os.remove(path2+ "/" + file)
 
                     path = r'dataSet'
                     for file in os.listdir('dataSet'):
@@ -265,7 +285,7 @@ class PicturesApp(App):
                         counter = 100
                         counter2 = counter2 + 150
 
-                    #picture.on_touch_down: print("hey")
+                    #picture.on_touch_down(self.root)
                     # add to the main field
 
                     box.add_widget(picture)
