@@ -100,7 +100,7 @@ class PicturesApp(App):
             root.add_widget(picture_text)
 
             def start_button(self):
-                loading_pic = Picture(source='Assets/loading.gif', pos=(600, 400))
+                loading_pic = Picture(source='Assets/loading.gif', pos=(self.parent.width /2 - self.width /2, 400))
                 start.disabled = True;
                 moveBlock()
 
@@ -143,7 +143,32 @@ class PicturesApp(App):
                             #incrementing sample number 
                             sampleNum=sampleNum+1
                             #saving the captured face in the dataset folder
-                            cv2.imwrite("dataSet/User."+Id +'.'+ str(sampleNum) + ".jpg", gray[y:y+h,x:x+w])
+                            fotoSource = "dataSet/User."+Id +'.'+ str(sampleNum) 
+                            cv2.imwrite(fotoSource + ".jpg", gray[y:y+h,x:x+w])
+
+                            #create mirror image
+                            dsFoto = cv2.imread(fotoSource + ".jpg")
+                            vertical_img = dsFoto.copy()
+                            vertical_img = cv2.flip(dsFoto, 1)
+                            cv2.imwrite(fotoSource + "mirror" + ".jpg", vertical_img)
+                            print("mirror created");
+
+                            #create rotated image
+                            dsFoto = cv2.imread(fotoSource + ".jpg")
+                            rotated = dsFoto.copy()
+                            (h, w) = rotated.shape[:2]
+                            center = (w/2, h/2)
+
+                            M = cv2.getRotationMatrix2D(center, 5, 1.0)
+                            rotated_img = cv2.warpAffine(rotated, M,(w, h))
+                            cv2.imwrite(fotoSource + "Rrotated" + ".jpg", rotated_img)
+                            print("rotation created");
+                            M = cv2.getRotationMatrix2D(center, 355, 1.0)
+                            rotated_img = cv2.warpAffine(rotated, M,(w, h))
+                            cv2.imwrite(fotoSource + "Lrotated" + ".jpg", rotated_img)
+                            print("rotation2 created");
+                            
+
 
                         #cv2.imshow('Face',img)
                         #wait for 100 miliseconds
@@ -152,7 +177,7 @@ class PicturesApp(App):
                            
                             break
                         # break if the sample number is morethan ...
-                        elif sampleNum >= 15:
+                        elif sampleNum >=13:
                             
                             break
                     delete_camera()
@@ -275,7 +300,7 @@ class KivyCamera(Image):
     
     def update(self, dt):
         face_cascade = cv2.CascadeClassifier('hc/haarcascade_frontalface_default.xml')
-        eye_cascade = cv2.CascadeClassifier('hc/haarcascade_eye.xml')
+        eye_cascade = cv2.CascadeClassifier('hc/haarcascade_eye_tree_eyeglasses.xml')
         ret, frame = self.capture.read()
         
         # Our operations on the frame come here

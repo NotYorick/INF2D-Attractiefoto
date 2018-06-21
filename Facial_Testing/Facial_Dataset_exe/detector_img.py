@@ -50,7 +50,7 @@ def recog(save):
                 bestImageValue = [x, y, w, h]
                 print(bestImage + "-------------------------------------------------------------BEST IMAGE")
 
-            if conf < 30:
+            if conf < 36:
                 if id==1:
                     if conf < 0:
                         ImageList.append(myFile)
@@ -60,6 +60,7 @@ def recog(save):
                     if save:
                         shutil.copy(myFile, "img_results/")
 
+                        
 
                 else:
                     name="NOONE"
@@ -78,6 +79,7 @@ def recog(save):
         end = time.time()
         print(end - start)
     ImageList.append(bestImage)
+
     cam.release()
     cv2.destroyAllWindows()
     return {'image':ImageList, 'values':bestImageValue}
