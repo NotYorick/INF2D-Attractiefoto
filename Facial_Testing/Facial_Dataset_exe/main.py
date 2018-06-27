@@ -39,25 +39,20 @@ class remove_place(Scatter):
 class Picture(Scatter, GridLayout, CompoundSelectionBehavior, FocusBehavior):
     selected = False
 
-##    def add_widget(self, widget):
-##        """ Override the adding of widgets so we can bind and catch their events. """
-##        widget.bind(on_touch_down=self.on_touch(self, widget))
-##        return super(GridLayout, self).add_widget(widget)
     def on_touch_down(self, touch):
         if self.collide_point(*touch.pos):
             print (os.path.basename(self.source))
             print ("selected before =", self.selected)
             if self.selected == False:
+				#Variable: second parameter of the copy method, this is the directory the images will be copied to
                 shutil.copy(self.source, 'selected/')
                 self.selected = True
                 print ("selected after =", self.selected)
             elif self.selected == True:
+				#Variable: filepath that will be removed
                 os.remove('selected/' + os.path.basename(self.source))
                 self.selected = False
                 print ("selected after =", self.selected)
-        #print(self)
-        #print(widget)
-        #self.remove_widget(widget)
         return
 
     def checkselected():
@@ -156,6 +151,7 @@ class PicturesApp(App):
 
 
                         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+						#Variable: parameters of detectMultiScale, gray is the image, scaleFactor and minNeighbors
                         faces = detector.detectMultiScale(gray, 1.05, 12)
                         
                         for (x,y,w,h) in faces:
@@ -275,6 +271,7 @@ class PicturesApp(App):
             counter = 100
             counter2 = 100
 
+			#Variable: the second parameter of join is the directory om the matched images
             for filename in glob(join(curdir, 'img_results', '*')):
 
                 try:
@@ -319,6 +316,7 @@ class KivyCamera(Image):
         updates.cancel()
     
     def update(self, dt):
+		#Variable: these CascadeClassifier method show the rectangles on the camera
         face_cascade = cv2.CascadeClassifier('hc/haarcascade_frontalface_default.xml')
         eye_cascade = cv2.CascadeClassifier('hc/haarcascade_eye_tree_eyeglasses.xml')
         ret, frame = self.capture.read()
@@ -326,6 +324,7 @@ class KivyCamera(Image):
         # Our operations on the frame come here
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         
+		#Variable: parameters of detectMultiScale, gray is the image, scaleFactor and minNeighbors
         faces = face_cascade.detectMultiScale(gray, 1.05, 3)
         
         # Display the resulting frame
