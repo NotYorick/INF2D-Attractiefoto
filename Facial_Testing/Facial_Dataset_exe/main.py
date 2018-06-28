@@ -44,12 +44,10 @@ class Picture(Scatter, GridLayout, CompoundSelectionBehavior, FocusBehavior):
             print (os.path.basename(self.source))
             print ("selected before =", self.selected)
             if self.selected == False:
-				#Variable: second parameter of the copy method, this is the directory the images will be copied to
                 shutil.copy(self.source, 'selected/')
                 self.selected = True
                 print ("selected after =", self.selected)
             elif self.selected == True:
-				#Variable: filepath that will be removed
                 os.remove('selected/' + os.path.basename(self.source))
                 self.selected = False
                 print ("selected after =", self.selected)
@@ -158,6 +156,7 @@ class PicturesApp(App):
                             cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
                             #incrementing sample number 
                             sampleNum=sampleNum+1
+                            #Variable: fotoSource contains the directory the taken photos will be written to
                             #saving the captured face in the dataset folder
                             fotoSource = "dataSet/User."+Id +'.'+ str(sampleNum) 
                             cv2.imwrite(fotoSource + ".jpg", gray[y:y+h,x:x+w])
@@ -259,8 +258,10 @@ class PicturesApp(App):
             exit_button = Button(text='[color=c0c5ce]Exit[/color]',markup = True, font_size='50sp', pos_hint={'x': 0.03, 'y': 0.05}, size_hint=(0.15,0.1))
             exit_button.bind(on_press=exit_session)
             root.add_widget(exit_button)
+
+            #Variable: size is the size of the box where all the pictures will be added to
             layout = ScrollView(size_hint=(None, None), size=(930, 630), pos_hint={'center_x': 0.5, 'center_y': .525}, do_scroll_x=False)
-            #layout.bind(minimum_height=layout.setter('height'))
+            #Variable: cols is the amount of pictures on each row, changing this may require changes in the picture.kv
             box = GridLayout(cols=3, size_hint_y=None)
             box.bind(minimum_height=box.setter("height"))
             layout.add_widget(box)
