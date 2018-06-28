@@ -44,10 +44,12 @@ class Picture(Scatter, GridLayout, CompoundSelectionBehavior, FocusBehavior):
             print (os.path.basename(self.source))
             print ("selected before =", self.selected)
             if self.selected == False:
+                #Variable: second parameter of the copy method, this is the directory the images will be copied to
                 shutil.copy(self.source, 'selected/')
                 self.selected = True
                 print ("selected after =", self.selected)
             elif self.selected == True:
+                #Variable: filepath that will be removed
                 os.remove('selected/' + os.path.basename(self.source))
                 self.selected = False
                 print ("selected after =", self.selected)
