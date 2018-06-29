@@ -293,8 +293,8 @@ class PicturesApp(App):
                 except FileNotFoundError as e:
                     Logger.exception('Pictures: Unable to load <%s>' % filename)        
         #Start here your methods
-        #build_camera()
-        build_picturescreen()
+        build_camera()
+        #build_picturescreen()
         #ConvertBlack.ConvertImages()
         #-------
                     
