@@ -1,2 +1,0 @@
-1. Foto's van persoon komen in de dataset.
-2. foto van attractiepark worden 1 voor 1 gecontroleerd met de dataset

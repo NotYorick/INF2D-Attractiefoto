@@ -3,6 +3,7 @@ import numpy as np
 from PIL import Image 
 def train():
     recognizer = cv2.face.LBPHFaceRecognizer_create()
+	#Variable: path is the name of the directory that needs to be trained
     path = 'dataSet'
 
 
@@ -16,12 +17,11 @@ def train():
             ID=int(os.path.split(imagePath)[-1].split('.')[1])
             faces.append(faceNp)
             IDs.append(ID)
-            #cv2.imshow("Training.",faceNp)
-            cv2.waitKey(10)
+            
         return np.array(IDs),faces
-    print("Training finished!")
 
     Ids,faces=getImageswithId(path)
     recognizer.train(faces,Ids)
+	#Variable: path and filename the data will be written in
     recognizer.write('trainer/trainingData.yml')
     cv2.destroyAllWindows()
